@@ -16,6 +16,11 @@ LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); //declaração do
 
 //constantes dos 3 botões e do struct da maquina de Turing
   const int ledPin = 13;
+  const int ledbit1 = 5;
+  const int ledbit2 = 6;
+  const int ledbit3 = 9;
+  const int ledbit4 = 10;
+  const int ledbit5 = 11;
   const int botao1=2,botao2=3,botao3=4;
   const int intervalo=500;
   const int estados_maximos=20;
@@ -48,6 +53,11 @@ void setup() {
   lcd.begin(16, 2);
   lcd.cursor();
   pinMode(ledPin, OUTPUT); 
+  pinMode(ledbit1, OUTPUT);
+  pinMode(ledbit2, OUTPUT); 
+  pinMode(ledbit3, OUTPUT); 
+  pinMode(ledbit4, OUTPUT); 
+  pinMode(ledbit5, OUTPUT);  
   pinMode(botao1,INPUT);
   pinMode(botao2,INPUT);
   pinMode(botao3,INPUT);
@@ -288,8 +298,33 @@ void loop() {
   //Serial.println(fase);
   //Serial.println(configuracao.examinado);
   //Serial.println((millis() - last_botao1)/1000);
-  
+ /*teste se as lampadas do resultado binario esta funcionando
+digitalWrite(5,HIGH);
+          delay(200);
+          digitalWrite(5,LOW);
+          delay(200);
   delay(10);
+  digitalWrite(6,HIGH);
+          delay(200);
+          digitalWrite(6,LOW);
+          delay(200);
+  delay(10);
+   digitalWrite(9,HIGH);
+          delay(200);
+          digitalWrite(9,LOW);
+          delay(200);
+  delay(10);
+  digitalWrite(10,HIGH);
+          delay(200);
+          digitalWrite(10,LOW);
+          delay(200);
+  delay(10);
+  digitalWrite(11,HIGH);
+          delay(200);
+          digitalWrite(11,LOW);
+          delay(200);
+  delay(10);
+  */
   desenhar();
   if (digitalRead(botao1)==HIGH){
   botao1_pressed();
