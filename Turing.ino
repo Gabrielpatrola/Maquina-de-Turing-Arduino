@@ -15,67 +15,67 @@ LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); //declaração do
   const int _bit4;
 
 //constantes dos 3 botões e do struct da maquina de Turing
-  const int boton1=2,boton2=3,boton3=4;
+  const int botao1=2,botao2=3,botao3=4;
   const int intervalo=500;
   const int estados_maximos=20;
   const int cinta_max=64;
   struct estado{
-    char orden_estrella;
-    char orden_palo;
-    int siguiente_estrella;
-    int siguiente_palo;
+    char ordem_estrela;
+    char ordem_barra;
+    int seguinte_estrela;
+    int seguinte_barra;
   };
 
   struct maquina{
-    int estado_actual;
-    int escrutado;
+    int estado_atual;
+    int examinado;
     estado estados[estados_maximos];
     int estados_usados;
     boolean cinta[cinta_max];
-    int pasos;
+    int passos;
   };
 
 //Variaveis
-long last_boton1,last_boton2,last_boton3;
+long last_botao1,last_botao2,last_botao3;
 //0 para entrar na ordem do *, 1 para transição de * ,2 para ordem de |, 3 para transição de | , 4 para fita , 5 para execução e 6 para parar.
 volatile int fase=0;
-maquina configuracion;
+maquina configuracao;
 
 void setup() {
   Serial.begin(9600);
-  attachInterrupt(0, forzar_restart, CHANGE);
+  attachInterrupt(0, forcar_reinicio, CHANGE);
   lcd.begin(16, 2);
   lcd.cursor();
   pinMode(ledPin, OUTPUT); 
-  pinMode(boton1,INPUT);
-  pinMode(boton2,INPUT);
-  pinMode(boton3,INPUT);
+  pinMode(botao1,INPUT);
+  pinMode(botao2,INPUT);
+  pinMode(botao3,INPUT);
   reiniciar(true);
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void forzar_restart(){
+
+void forcar_reinicio(){
   if(fase==5){
     fase=6;
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void reiniciar(boolean total){
   lcd.clear();
-  configuracion.pasos=0;
-  configuracion.estado_actual =0;
-  configuracion.escrutado=(cinta_max/2)+1;
-  configuracion.estados_usados=0;
+  configuracao.passos=0;
+  configuracao.estado_atual =0;
+  configuracao.examinado=(cinta_max/2)+1;
+  configuracao.estados_usados=0;
   for (int t=0;t<=cinta_max-1;t++){
-    configuracion.cinta[t] = false;
+    configuracao.cinta[t] = false;
   }
   if(total){
     for(int t=0;t<=estados_maximos-1;t++){
-      configuracion.estados[t].orden_estrella = '*';
-      configuracion.estados[t].orden_palo= '|';
-      configuracion.estados[t].siguiente_estrella = 0;
-      configuracion.estados[t].siguiente_palo = 0;
+      configuracao.estados[t].ordem_estrela = '*';
+      configuracao.estados[t].ordem_barra= '|';
+      configuracao.estados[t].seguinte_estrela = 0;
+      configuracao.estados[t].seguinte_barra = 0;
     }
   }
   else{
@@ -84,92 +84,92 @@ void reiniciar(boolean total){
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void boton1_pressed(){
-  if((millis() - last_boton1)>intervalo){
+void botao1_pressed(){
+  if((millis() - last_botao1)>intervalo){
 switch (fase) {
   case 0:
- switch(configuracion.estados[configuracion.estados_usados].orden_estrella){
+ switch(configuracao.estados[configuracao.estados_usados].ordem_estrela){
     case '*':
-    configuracion.estados[configuracion.estados_usados].orden_estrella = '|';
+    configuracao.estados[configuracao.estados_usados].ordem_estrela = '|';
     break;
     case '|':
-    configuracion.estados[configuracion.estados_usados].orden_estrella = 'r';
+    configuracao.estados[configuracao.estados_usados].ordem_estrela = 'r';
     break;
     case 'r':
-    configuracion.estados[configuracion.estados_usados].orden_estrella = 'l';
+    configuracao.estados[configuracao.estados_usados].ordem_estrela = 'l';
     break;
     case 'l':
-    configuracion.estados[configuracion.estados_usados].orden_estrella = 'h';
+    configuracao.estados[configuracao.estados_usados].ordem_estrela = 'h';
     break;
     case 'h':
-    configuracion.estados[configuracion.estados_usados].orden_estrella = '*';
+    configuracao.estados[configuracao.estados_usados].ordem_estrela = '*';
     break;
     }
 break;
 case 1:
-  configuracion.estados[configuracion.estados_usados].siguiente_estrella ++;
+  configuracao.estados[configuracao.estados_usados].seguinte_estrela ++;
 break;
 case 2:
-    switch(configuracion.estados[configuracion.estados_usados].orden_palo){
+    switch(configuracao.estados[configuracao.estados_usados].ordem_barra){
     case '*':
-    configuracion.estados[configuracion.estados_usados].orden_palo = '|';
+    configuracao.estados[configuracao.estados_usados].ordem_barra = '|';
     break;
     case '|':
-    configuracion.estados[configuracion.estados_usados].orden_palo= 'r';
+    configuracao.estados[configuracao.estados_usados].ordem_barra= 'r';
     break;
     case 'r':
-    configuracion.estados[configuracion.estados_usados].orden_palo = 'l';
+    configuracao.estados[configuracao.estados_usados].ordem_barra = 'l';
     break;
     case 'l':
-    configuracion.estados[configuracion.estados_usados].orden_palo = 'h';
+    configuracao.estados[configuracao.estados_usados].ordem_barra = 'h';
     break;
     case 'h':
-    configuracion.estados[configuracion.estados_usados].orden_palo = '*';
+    configuracao.estados[configuracao.estados_usados].ordem_barra = '*';
     break;
     }
 break;
 case 3:
-  configuracion.estados[configuracion.estados_usados].siguiente_palo ++;
+  configuracao.estados[configuracao.estados_usados].seguinte_barra ++;
 break;
 case 4:
-  configuracion.cinta[configuracion.escrutado] = !configuracion.cinta[configuracion.escrutado];
-  configuracion.escrutado ++;
+  configuracao.cinta[configuracao.examinado] = !configuracao.cinta[configuracao.examinado];
+  configuracao.examinado ++;
 break;
 case 6:
   fase =5;
-  configuracion.pasos=0;
-  configuracion.estado_actual =0;
+  configuracao.passos=0;
+  configuracao.estado_atual =0;
   delay(1000);
   transitar();
 break;
 }
-last_boton1 = millis();
+last_botao1 = millis();
 }
 }
 
 
-void boton2_pressed(){
-  if((millis() - last_boton2)>intervalo){
+void botao2_pressed(){
+  if((millis() - last_botao2)>intervalo){
     if (fase<3){
       fase++;
     }
     else if (fase==3){
-        configuracion.estados_usados ++;
+        configuracao.estados_usados ++;
         fase =0;
       }
     else if (fase==4){
-          configuracion.escrutado ++;
+          configuracao.examinado ++;
           }
     else{
       reiniciar(false);
     }
-  last_boton2 = millis();
+  last_botao2 = millis();
   }
 }
 
 
-void boton3_pressed(){
-  if((millis() - last_boton3)>intervalo){
+void botao3_pressed(){
+  if((millis() - last_botao3)>intervalo){
     if (fase<4){
       fase=4;
     }
@@ -183,7 +183,7 @@ void boton3_pressed(){
       lcd.clear();
       fase = 0;
     }
-  last_boton3 = millis();
+  last_botao3 = millis();
   }
 }
 
@@ -191,27 +191,27 @@ void boton3_pressed(){
 void transitar(){
 while(fase!=6){
 char orden;
-int siguiente;
-  if(configuracion.cinta[configuracion.escrutado]){
-  orden = configuracion.estados[configuracion.estado_actual].orden_palo;
-  siguiente = configuracion.estados[configuracion.estado_actual].siguiente_palo;
+int seguinte;
+  if(configuracao.cinta[configuracao.examinado]){
+  orden = configuracao.estados[configuracao.estado_atual].ordem_barra;
+  seguinte = configuracao.estados[configuracao.estado_atual].seguinte_barra;
   }else{
-  orden = configuracion.estados[configuracion.estado_actual].orden_estrella;
-  siguiente = configuracion.estados[configuracion.estado_actual].siguiente_estrella;
+  orden = configuracao.estados[configuracao.estado_atual].ordem_estrela;
+  seguinte = configuracao.estados[configuracao.estado_atual].seguinte_estrela;
   }
-  configuracion.estado_actual = siguiente;
+  configuracao.estado_atual = seguinte;
   switch(orden){
   case 'l':
-  configuracion.escrutado --;
+  configuracao.examinado --;
   break;
   case 'r':
-  configuracion.escrutado ++;
+  configuracao.examinado ++;
   break;
   case '|':
-  configuracion.cinta[configuracion.escrutado] = !configuracion.cinta[configuracion.escrutado];
+  configuracao.cinta[configuracao.examinado] = !configuracao.cinta[configuracao.examinado];
   break;
   case '*':
-  configuracion.cinta[configuracion.escrutado] = !configuracion.cinta[configuracion.escrutado];
+  configuracao.cinta[configuracao.examinado] = !configuracao.cinta[configuracao.examinado];
   break;
    case 'h':
   fase = 6;
@@ -222,17 +222,16 @@ int siguiente;
   delay(200);
   }
   break;
-  
   }
-configuracion.pasos ++;  
-dibujar(); 
+configuracao.passos ++;  
+desenhar(); 
 delay(1000); 
 }
   
   
 }
 
-void dibujar(){
+void desenhar(){
 switch (fase) {
   case 0:
   case 1:
@@ -240,18 +239,18 @@ switch (fase) {
   case 3:
  lcd.setCursor(0,0);
  lcd.print('q');
- lcd.print(configuracion.estados_usados);
+ lcd.print(configuracao.estados_usados);
  lcd.print(" * "); 
- lcd.print(configuracion.estados[configuracion.estados_usados].orden_estrella);
+ lcd.print(configuracao.estados[configuracao.estados_usados].ordem_estrela);
  lcd.print(" "); 
- lcd.print(configuracion.estados[configuracion.estados_usados].siguiente_estrella);
+ lcd.print(configuracao.estados[configuracao.estados_usados].seguinte_estrela);
  lcd.setCursor(0,1);
  lcd.print('q');
- lcd.print(configuracion.estados_usados);
+ lcd.print(configuracao.estados_usados);
  lcd.print(" | "); 
- lcd.print(configuracion.estados[configuracion.estados_usados].orden_palo);
+ lcd.print(configuracao.estados[configuracao.estados_usados].ordem_barra);
  lcd.print(" "); 
- lcd.print(configuracion.estados[configuracion.estados_usados].siguiente_palo);
+ lcd.print(configuracao.estados[configuracao.estados_usados].seguinte_barra);
  if(fase==0){
  lcd.setCursor(5,0);
  }else if(fase==1){
@@ -266,20 +265,20 @@ switch (fase) {
   case 4:
   case 5:
   lcd.setCursor(0,0);
-  int aux = configuracion.escrutado/16;
+  int aux = configuracao.examinado/16;
   for(int t=0;t<16;t++){
-    if(configuracion.cinta[(aux*16)+t]){
+    if(configuracao.cinta[(aux*16)+t]){
   lcd.print('|');}
   else{
   lcd.print('*');}
   }
   lcd.setCursor(0,1);
   lcd.print("Estd:");
-  lcd.print(configuracion.estado_actual); 
+  lcd.print(configuracao.estado_atual); 
   lcd.print(" Trans:");
-  lcd.print(configuracion.pasos);
+  lcd.print(configuracao.passos);
   
-  lcd.setCursor(configuracion.escrutado%16,0);
+  lcd.setCursor(configuracao.examinado%16,0);
    break;
  }
 }
@@ -288,18 +287,18 @@ switch (fase) {
 
 void loop() {
   Serial.println(fase);
-  Serial.println(configuracion.escrutado);
-  Serial.println((millis() - last_boton1)/1000);
+  Serial.println(configuracao.examinado);
+  Serial.println((millis() - last_botao1)/1000);
   
   delay(10);
-  dibujar();
-  if (digitalRead(boton1)==HIGH){
-  boton1_pressed();
+  desenhar();
+  if (digitalRead(botao1)==HIGH){
+  botao1_pressed();
   }
-  if (digitalRead(boton2)==HIGH){
-  boton2_pressed();
+  if (digitalRead(botao2)==HIGH){
+  botao2_pressed();
   }
-  if (digitalRead(boton3)==HIGH){
-  boton3_pressed();
+  if (digitalRead(botao3)==HIGH){
+  botao3_pressed();
   }
 }
