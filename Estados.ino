@@ -1,14 +1,11 @@
-//= Maschine mit State ============================================================================
-//TurINO-Machine 
-// Nikolai Kafer
-// Tobias Sander
-// Ping SS’15 
-//-Optionen------------------------------------------------------------------------------------------------
-//Textausgabe von Debuggingnachrichten
+//= Maquina de Turing ============================================================================
+
+//------------------------------------------------------------------------------------------------
+//Saidas de texto
 boolean debugging = true;
-// False,  wenn man mit dem Knopf auf 12 inzelne Schritte machen will
+// Caso falso, apertar o botao de passagem automatica (pin 12)
 boolean stepThrough = true;
-//Mögliche Programme
+//Operacoes possiveis
 String Werte[3] = {
   "Incremento", "Flip Flop", "Somador"
 };
@@ -18,7 +15,7 @@ char WERTESIZE = 3;
 #define INCREMENT 'I'
 #define ADDER 'A'
 
-//Welches Programm ausgefuehrt werden soll
+//Escolhe a operacao a ser executada
 char programm = MENU;
 
 
@@ -88,7 +85,7 @@ int RECV_PIN = A0;
 IRrecv irrecv(RECV_PIN);
 decode_results results;
 
-//-Zustanddarstellung & -operationen -----------------------------------------------------------------------------------------------
+//-Estados e Operacoes -----------------------------------------------------------------------------------------------
 struct state {
   char write_ZERO;
   char write_ONE;
@@ -106,7 +103,7 @@ struct state {
 };
 
 
-//-----------Programm, das von Rechts nach Links den Bandinhalt flippt--------
+//-----------Parte que move o conteudo da fita da direita para esquerda--------
 struct state *FlipProgramm() {
   struct state *state0 = (state*) malloc(sizeof(state));
 
@@ -126,7 +123,7 @@ struct state *FlipProgramm() {
   return state0;
 }
 
-//-----Programm, das unendlich lange binär hochzählt-----------------------------
+//-----Incrementador da fita infinita-----------------------------
 struct state *IncrementProgramm() {
   Serial.println("IncrementProgramm");
   struct state *state0 = (state*) malloc(sizeof(state));
@@ -194,7 +191,7 @@ struct state *IncrementProgramm() {
   return state0;
 }
 
-//----------Programm, wo Fehler schnell auffallen-----------------------------------
+//----------Estados de aceitacao e rejeicao-----------------------------------
 struct state *Stabilitytest() {
   Serial.println("Stabilitytest");
 
@@ -258,7 +255,7 @@ struct state *Stabilitytest() {
   return state0;
 }
 
-//------------Schreibbefehl-----------------------------------
+//------------Comando para escrever-----------------------------------
 void writeCell(char val) {
   send(WRITE);
   send(val);
@@ -266,7 +263,7 @@ void writeCell(char val) {
   //  Serial.println(val);
 }
 
-//------------Bewegungsbefehl-----------------------------------
+//------------Comando para o movimento da fita-----------------------------------
 void moveTape(char val) {
   send(MOVE);
   send(val);
@@ -274,7 +271,7 @@ void moveTape(char val) {
   Serial.println(val);
 }
 
-//--------------- RUN- Methode----------------------------------------------------------
+//--------------- Funcao inicio----------------------------------------------------------
 
 void run(struct state *head) {
 
@@ -312,20 +309,20 @@ void run(struct state *head) {
       break;
     }
 
-    // ---------Von der Bandmaschine lesen------------
+    // ---------Ler a maquina------------
     send(READ);
     received = read();
 
     Serial.print("Received is:  ");
     Serial.println(received);
 
-    // ---------Falls Kommunikationsfehler auftritt überspringe die Runde und versuche eine Synchronisation------------
+    // ---------Possivel erro de comunicacao------------
     if (received != RESEND) {
       printState(head, received);
       lastHead = head;
 
 
-      //---Warte auf Signal von Nutzer und sende Schreibsignal-----------------------
+      //---Leitura e gravacao-----------------------
       waitForNextStep();
       // schreiben
       switch (received) {
@@ -340,7 +337,7 @@ void run(struct state *head) {
           break;
       }
 
-      //---Warte auf Signal von Nutzer und sende Bewegungsbefehl-----------------------------------------
+      //---Comando de movimento-----------------------------------------
       waitForNextStep();
       // bewegen
       switch (received) {
@@ -358,7 +355,7 @@ void run(struct state *head) {
           break;
       }
 
-      //---Warte auf Signal von Nutzer und ändere Zustand----------------------
+      //---Mudanca de estado----------------------
       waitForNextStep();
       // Zustand wechseln
       Serial.println(received);
@@ -390,7 +387,7 @@ void run(struct state *head) {
       }
     }
     else {
-      //-----------------------Versuche den Schritt rückgängig zu machen----------------------
+      //-----------------------Caso de erro----------------------
       head = lastHead;
     }
   }
@@ -436,7 +433,7 @@ void setup() {
   run(head);
 }
 
-//---------------Sendeoperation---------------------------------
+//---------------Envio da operacao---------------------------------
 void send(char a) {
 
   delay(100);
@@ -448,7 +445,7 @@ void send(char a) {
 }
 
 
-//---------------Leseoperation---------------------------------
+//---------------Operacao de leitura---------------------------------
 char read() {
   irrecv.enableIRIn();
   char received = NULL;
@@ -493,7 +490,7 @@ char read() {
   return (received);
 }
 
-//---------------Synchronisationsfeature---------------------------------
+//---------------Sincronizacao---------------------------------
 void resetState() {
   Serial.println("Reseting");
   char received = NULL;
@@ -537,7 +534,7 @@ void loop() {
 
 }
 
-//--------------------Testen, ob gelesenes zeichen akzeptiert wird------------------------
+//--------------------Testa se o caractere escrito foi aceito------------------------
 bool check(char a) {
   switch (a) {
     case ZERO:
@@ -561,7 +558,7 @@ bool check(char a) {
   }
   return false;
 }
-//------------------------Warten auf Nutzereingabe auf pin 12-----------------
+//------------------------Entrada do usuario no pino 12-----------------
 void waitForNextStep() {
   while ((digitalRead(PIN_OK)) && !stepThrough) {
     delay( 1);
@@ -571,7 +568,7 @@ void waitForNextStep() {
   }
 }
 
-//------------------------------Auswahlmenu------------------------------------
+//------------------------------Menu de selecao------------------------------------
 struct state* startMenu() {
   lcd.print("Menu Principal");
   makeSound(440);
@@ -645,7 +642,7 @@ struct state* startMenu() {
   return ret;
 
 }
-//---------------------Darstellung des Zustandes----------------------
+//---------------------Representacao do estado----------------------
 void printState(struct state* head, char received) {
   Serial.print("Der State ist ");
   String toWrite = "Estado # ";
@@ -725,7 +722,7 @@ void printState(struct state* head, char received) {
   lcd.print(toWrite);
 }
 
-//-----Addiert zwei Binärzahlen-----------------------------
+//-----programa de adicao-----------------------------
 struct state *AddierProgramm() {
   Serial.println("IncrementProgramm");
   struct state *state0 = (state*) malloc(sizeof(state));
